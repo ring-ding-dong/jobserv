@@ -1,0 +1,72 @@
+plugins {
+    id 'java'
+    id 'maven-publish'
+}
+
+group = 'com.github.ring-ding-dong'
+version = '0.1.0-SNAPSHOT'
+
+java {
+    sourceCompatibility = JavaVersion.VERSION_1_8
+    targetCompatibility = JavaVersion.VERSION_1_8
+}
+
+compileJava {
+    // Java 8 호환성을 위한 컴파일 옵션
+    options.release = 8
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+
+    // 코어 라이브러리
+    implementation 'org.apache.commons:commons-lang3:3.15.0'
+    implementation 'com.google.guava:guava:33.2.1-jre'
+    implementation 'org.apache.commons:commons-collections4:4.4'
+    implementation 'org.apache.commons:commons-math3:3.6'
+
+    // 압축 라이브러리
+    implementation 'org.apache.commons:commons-compress:1.26.1'
+
+    // 직렬화 라이브러리
+    implementation 'com.esotericsoftware:kryo:5.5.0'
+
+    // 오프-힙 메모리 관리
+    implementation 'org.agrona:agrona:1.21.2'
+
+
+    // 고성능 프리미티브 컬렉션
+    implementation 'it.unimi.dsi:fastutil:8.5.13'
+
+    // 로깅
+    implementation 'org.slf4j:slf4j-api:2.0.12'
+    implementation 'ch.qos.logback:logback-classic:1.5.6'
+
+    // 테스팅
+    testImplementation 'org.mockito:mockito-core:5.11.0'
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.10.3'
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.10.2'
+
+    // 벤치마킹
+    testImplementation 'org.openjdk.jmh:jmh-core:1.37'
+    testAnnotationProcessor 'org.openjdk.jmh:jmh-generator-annprocess:1.37'
+}
+
+test {
+    useJUnitPlatform()
+}
+
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            from components.java
+        }
+    }
+}
+
+javadoc {
+    options.addStringOption('Xdoclint:none', '-quiet')
+}
