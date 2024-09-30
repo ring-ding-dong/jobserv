@@ -23,8 +23,6 @@ To get started with Jobserv, simply download the JAR file from the [releases pag
 
 # Package Structure
 
-네, Jobserv 프로젝트를 위한 구조를 설계해 드리겠습니다. 이 구조는 순수 자바로 구현되며, 로깅, 성능 모니터링, 그리고 시스템 진단 기능을 포함합니다.
-
 ```plaintext
 jobserv
 ├── src
