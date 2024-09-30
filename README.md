@@ -26,44 +26,31 @@ To get started with Jobserv, simply download the JAR file from the [releases pag
 ```plaintext
 jobserv
 ├── src
-│   └── main
+│   ├── main
+│   │   ├── java
+│   │   │   └── com
+│   │   │       └── jobserv
+│   │   │           ├── core
+│   │   │           ├── logging
+│   │   │           ├── performance
+│   │   │           ├── monitoring
+│   │   │           ├── util
+│   │   │           └── exception
+│   │   └── resources
+│   │       └── jobserv.properties
+│   └── test
 │       └── java
 │           └── com
 │               └── jobserv
-│                   ├── core
-│                   │   ├── JobservManager.java
-│                   │   └── ConfigManager.java
 │                   ├── logging
-│                   │   ├── Logger.java
-│                   │   ├── LogLevel.java
-│                   │   ├── FileLogger.java
-│                   │   └── ConsoleLogger.java
 │                   ├── performance
-│                   │   ├── PerformanceTracker.java
-│                   │   ├── MethodTimer.java
-│                   │   └── ExecutionStatistics.java
-│                   ├── monitoring
-│                   │   ├── SystemMonitor.java
-│                   │   ├── CpuMonitor.java
-│                   │   ├── MemoryMonitor.java
-│                   │   └── DiskMonitor.java
-│                   ├── util
-│                   │   ├── TimeUtil.java
-│                   │   └── StringUtil.java
-│                   └── exception
-│                       └── JobservException.java
-├── test
-│   └── java
-│       └── com
-│           └── jobserv
-│               ├── logging
-│               ├── performance
-│               └── monitoring
-├── resources
-│   └── jobserv.properties
+│                   └── monitoring
+├── build.gradle
+├── settings.gradle
+├── gradlew
+├── gradlew.bat
 ├── README.md
-├── LICENSE
-└── pom.xml
+└── LICENSE
 
 ```
 
