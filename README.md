@@ -24,27 +24,68 @@ To get started with Jobserv, simply download the JAR file from the [releases pag
 # Package Structure
 
 ```plaintext
-jobserv
-├── src
-│   ├── main
-│   │   ├── java
-│   │   │   └── com
-│   │   │       └── jobserv
-│   │   │           ├── core
-│   │   │           ├── logging
-│   │   │           ├── performance
-│   │   │           ├── monitoring
-│   │   │           ├── util
-│   │   │           └── exception
-│   │   └── resources
-│   │       └── jobserv.properties
-│   └── test
-│       └── java
-│           └── com
-│               └── jobserv
-│                   ├── logging
-│                   ├── performance
-│                   └── monitoring
+jobserv/
+├── gradle/
+│   └── wrapper/
+│       ├── gradle-wrapper.jar
+│       └── gradle-wrapper.properties
+├── api/
+│   ├── src/
+│   │   ├── main/java/com/ring_ding_dong/jobserv/api/
+│   │   │   ├── JobservManager.java
+│   │   │   ├── logging/
+│   │   │   │   └── Logger.java
+│   │   │   ├── performance/
+│   │   │   │   └── PerformanceTracker.java
+│   │   │   └── monitoring/
+│   │   │       └── SystemMonitor.java
+│   │   └── test/java/com/ring_ding_dong/jobserv/api/
+│   └── build.gradle
+├── core/
+│   ├── src/
+│   │   ├── main/java/com/ring_ding_dong/jobserv/core/
+│   │   │   ├── ConfigManager.java
+│   │   │   ├── util/
+│   │   │   │   ├── TimeUtil.java
+│   │   │   │   └── StringUtil.java
+│   │   │   └── exception/
+│   │   │       └── JobservException.java
+│   │   └── test/java/com/ring_ding_dong/jobserv/core/
+│   └── build.gradle
+├── logging/
+│   ├── src/
+│   │   ├── main/java/com/ring_ding_dong/jobserv/logging/
+│   │   │   ├── LogLevel.java
+│   │   │   ├── FileLogger.java
+│   │   │   └── ConsoleLogger.java
+│   │   └── test/java/com/ring_ding_dong/jobserv/logging/
+│   └── build.gradle
+├── performance/
+│   ├── src/
+│   │   ├── main/java/com/ring_ding_dong/jobserv/performance/
+│   │   │   ├── MethodTimer.java
+│   │   │   └── ExecutionStatistics.java
+│   │   └── test/java/com/ring_ding_dong/jobserv/performance/
+│   └── build.gradle
+├── monitoring/
+│   ├── src/
+│   │   ├── main/java/com/ring_ding_dong/jobserv/monitoring/
+│   │   │   ├── CpuMonitor.java
+│   │   │   ├── MemoryMonitor.java
+│   │   │   └── DiskMonitor.java
+│   │   └── test/java/com/ring_ding_dong/jobserv/monitoring/
+│   └── build.gradle
+├── annotation/
+│   ├── src/
+│   │   ├── main/java/com/ring_ding_dong/jobserv/annotation/
+│   │   │   └── MeasureTime.java
+│   │   └── test/java/com/ring_ding_dong/jobserv/annotation/
+│   └── build.gradle
+├── sample/
+│   ├── src/
+│   │   └── main/java/com/ring_ding_dong/jobserv/sample/
+│   │       └── SampleApplication.java
+│   └── build.gradle
 ├── build.gradle
 ├── settings.gradle
 ├── gradlew
@@ -54,42 +95,42 @@ jobserv
 
 ```
 
-이 구조에 대한 설명:
+이 구조의 주요 특징 및 설명:
 
-1. `core` 패키지:
-    - `JobservManager.java`: Jobserv의 주요 기능을 관리하고 조정하는 중앙 클래스
-    - `ConfigManager.java`: 설정을 로드하고 관리
+1. `api` 모듈:
+   - 주요 인터페이스와 추상 클래스를 포함합니다.
+   - `JobservManager`, `Logger`, `PerformanceTracker`, `SystemMonitor` 등 핵심 API를 정의합니다.
 
-2. `logging` 패키지:
-    - `Logger.java`: 로깅 인터페이스
-    - `LogLevel.java`: 로그 레벨을 정의하는 열거형
-    - `FileLogger.java`: 파일에 로그를 작성하는 구현체
-    - `ConsoleLogger.java`: 콘솔에 로그를 출력하는 구현체
+2. `core` 모듈:
+   - 공통 유틸리티, 설정 관리, 예외 처리 등 핵심 기능을 포함합니다.
+   - `ConfigManager`, `TimeUtil`, `StringUtil`, `JobservException` 등이 여기에 위치합니다.
 
-3. `performance` 패키지:
-    - `PerformanceTracker.java`: 전반적인 성능 추적을 관리
-    - `MethodTimer.java`: 개별 메소드의 실행 시간을 측정
-    - `ExecutionStatistics.java`: 실행 통계를 저장하고 분석
+3. `logging`, `performance`, `monitoring` 모듈:
+   - 각 기능의 구체적인 구현을 포함합니다.
+   - API 모듈의 인터페이스를 구현합니다.
 
-4. `monitoring` 패키지:
-    - `SystemMonitor.java`: 시스템 모니터링을 총괄
-    - `CpuMonitor.java`: CPU 사용량 모니터링
-    - `MemoryMonitor.java`: 메모리 사용량 모니터링
-    - `DiskMonitor.java`: 디스크 I/O 모니터링
+4. `annotation` 모듈:
+   - `MeasureTime` 등의 커스텀 어노테이션을 정의합니다.
 
-5. `util` 패키지:
-    - `TimeUtil.java`: 시간 관련 유틸리티 메소드
-    - `StringUtil.java`: 문자열 처리 유틸리티 메소드
+5. `sample` 모듈:
+   - 라이브러리 사용 예제를 제공합니다.
 
-6. `exception` 패키지:
-    - `JobservException.java`: Jobserv 관련 예외 클래스
+6. 루트 디렉토리:
+   - `build.gradle`: 전체 프로젝트 설정
+   - `settings.gradle`: 모듈 정의
+   - `README.md`: 프로젝트 설명 및 사용 방법
+   - `LICENSE`: 오픈 소스 라이선스
 
-7. `test` 디렉토리: 각 주요 컴포넌트에 대한 단위 테스트
+7. 각 모듈의 `src/main/resources`:
+   - `jobserv.properties` 등의 설정 파일을 포함할 수 있습니다.
 
-8. `resources` 디렉토리:
-    - `jobserv.properties`: Jobserv의 기본 설정 파일
+8. 각 모듈의 `src/test`:
+   - 해당 모듈의 단위 테스트를 포함합니다.
 
-9. 루트 디렉토리:
-    - `README.md`: 프로젝트 설명 및 사용 방법
-    - `LICENSE`: 오픈 소스 라이선스 파일
-    - `pom.xml`: Maven 프로젝트 설정 파일 (만약 빌드 도구로 Maven을 사용한다면)
+이 구조의 장점:
+
+1. 모듈화: 각 기능이 독립적인 모듈로 분리되어 있어 유지보수와 확장이 용이합니다.
+2. API 분리: 공개 API가 별도의 모듈로 분리되어 있어 사용자 인터페이스가 명확합니다.
+3. 의존성 관리: 각 모듈 간의 의존성을 명확히 제어할 수 있습니다.
+4. 테스트 용이성: 각 모듈별로 독립적인 테스트가 가능합니다.
+5. 샘플 제공: 별도의 샘플 모듈을 통해 사용 예제를 제공합니다.

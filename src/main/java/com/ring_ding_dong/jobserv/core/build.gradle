@@ -1,0 +1,6 @@
+jar {
+    manifest {
+        attributes 'Implementation-Title': 'Jobserv Core',
+                'Implementation-Version': archiveVersion
+    }
+}

@@ -1,82 +1,80 @@
+// 프로젝트에 적용할 플러그인 선언
 plugins {
-    id 'java'
-    id 'maven-publish'
-    id 'java-library'
-    id 'signing'
+    id 'java-library'        // Java 라이브러리 프로젝트를 위한 플러그인
+    id 'maven-publish'       // Maven 저장소에 프로젝트를 발행하기 위한 플러그인
 }
 
-group = 'com.ring-ding-dong'
-version = '0.1.0'
+// 모든 프로젝트(루트 및 서브프로젝트)에 적용될 공통 설정
+allprojects {
+    group = 'com.ring-ding-dong'  // 프로젝트의 그룹 ID 설정
+    version = '0.1.0'             // 프로젝트의 버전 설정
 
-java {
-    sourceCompatibility = JavaVersion.VERSION_1_8
-    targetCompatibility = JavaVersion.VERSION_1_8
-    withJavadocJar()
-    withSourcesJar()
-}
-
-compileJava {
-    // Java 8 호환성을 위한 컴파일 옵션
-    options.release = 8
-}
-
-repositories {
-    mavenCentral()
-}
-
-dependencies {
-
-    // 테스팅
-    testImplementation 'org.mockito:mockito-core:5.11.0'
-    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.10.3'
-    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.10.2'
-
-}
-
-test {
-    useJUnitPlatform()
-}
-
-publishing {
-    publications {
-        mavenJava(MavenPublication) {
-            from components.java
-
-            pom {
-                name = 'Jobserv'
-                description = 'Java Observability Toolkit'
-                url = 'https://github.com/ring-ding-dong/jobserv'
-                licenses {
-                    license {
-                        name = 'Apache-2.0'
-                        url = 'https://www.apache.org/licenses/LICENSE-2.0.txt'
-                    }
-                }
-                developers {
-                    developer {
-                        id = 'chimaek'
-                        name = 'Seung ju Kim'
-                        email = 'pipiru100@gmail.com'
-                    }
-                }
-                scm {
-                    connection = 'scm:git:git://github.com/ring-ding-dong/jobserv.git'
-                    developerConnection = 'scm:git::ssh://github.com/ring-ding-dong/jobserv.git'
-                    url = 'https://github.com/ring-ding-dong/jobserv'
-                }
-            }
-        }
+    repositories {
+        mavenCentral()            // 의존성을 다운로드할 저장소 지정 (Maven Central)
     }
 }
 
-signing {
-    sign publishing.publications.mavenJava
-}
+// 서브프로젝트에만 적용될 설정
+subprojects {
+    apply plugin: 'java-library'   // 각 서브프로젝트에 Java 라이브러리 플러그인 적용
+    apply plugin: 'maven-publish'  // 각 서브프로젝트에 Maven 발행 플러그인 적용
 
+    // Java 소스 및 타겟 호환성 버전 설정 (Java 8)
+    sourceCompatibility = JavaVersion.VERSION_1_8
+    targetCompatibility = JavaVersion.VERSION_1_8
 
-javadoc {
-    options.addStringOption('Xdoclint:none', '-quiet')
-    if (JavaVersion.current().isJava9Compatible()) {
-        options.addBooleanOption('html5', true)
+    // 프로젝트 의존성 설정
+    dependencies {
+        // 테스트를 위한 Mockito 라이브러리 추가
+        testImplementation 'org.mockito:mockito-core:5.14.1'
+        // JUnit 5 API 추가 (테스트 작성용)
+        testImplementation 'org.junit.jupiter:junit-jupiter-api:5.10.3'
+        // JUnit 5 엔진 추가 (테스트 실행용)
+        testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.10.2'
+    }
+
+    // 테스트 실행 설정
+    test {
+        useJUnitPlatform()  // JUnit 5 플랫폼을 사용하여 테스트 실행
+    }
+
+    // Java 프로젝트 설정
+    java {
+        withJavadocJar()  // Javadoc JAR 파일 생성
+        withSourcesJar()  // 소스 코드 JAR 파일 생성
+    }
+
+    // Maven 저장소 발행 설정
+    publishing {
+        publications {
+            mavenJava(MavenPublication) {
+                from components.java  // Java 컴포넌트를 발행
+
+                // POM 파일 정보 설정
+                pom {
+                    name = 'Jobserv'
+                    description = 'Java Observability Toolkit'
+                    url = 'https://github.com/ring-ding-dong/jobserv'
+                    licenses {
+                        license {
+                            name = 'Apache-2.0'
+                            url = 'https://www.apache.org/licenses/LICENSE-2.0.txt'
+                        }
+                    }
+                    developers {
+                        developer {
+                            id = 'chimaek'
+                            name = 'Seung ju Kim'
+                            email = 'pipiru100@gmail.com'
+                        }
+                    }
+                    scm {
+                        connection = 'scm:git:git://github.com/ring-ding-dong/jobserv.git'
+                        developerConnection = 'scm:git::ssh://github.com/ring-ding-dong/jobserv.git'
+                        url = 'https://github.com/ring-ding-dong/jobserv'
+                    }
+                }
+            }
+        }
     }
 }

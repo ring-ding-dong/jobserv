@@ -1,0 +1,10 @@
+dependencies {
+    implementation project(':core')
+}
+
+jar {
+    manifest {
+        attributes 'Implementation-Title': 'Jobserv API',
+                'Implementation-Version': archiveVersion
+    }
+}
