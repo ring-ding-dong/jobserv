@@ -12,6 +12,8 @@ public interface TimeLogger {
      */
     void log(String message) throws LoggingException;
 
+    void logExecutionTime(String methodName, long duration, String timeUnit, double threshold);
+
     /**
      * Closes any resources associated with the logger. This method should be called when the logger
      * is no longer needed.
