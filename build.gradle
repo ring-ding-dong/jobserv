@@ -44,6 +44,10 @@ subprojects {
         withSourcesJar()  // 소스 코드 JAR 파일 생성
     }
 
+    tasks.withType(Javadoc).configureEach {
+        options.encoding = 'UTF-8'
+    }
+
     // Maven 저장소 발행 설정
     publishing {
         publications {
@@ -77,4 +81,31 @@ subprojects {
             }
         }
     }
+}
+
+// Javadoc 설정 추가
+
+tasks.register('aggregateJavadoc', Javadoc) {
+    title = "jobserv API Documentation"
+    destinationDir = file("$buildDir/docs/javadoc")
+
+    options.memberLevel = JavadocMemberLevel.PROTECTED
+    options.author = true
+    options.version = true
+    options.header = "jobserv Library"
+    options.use = true
+    options.splitIndex = true
+
+    source = subprojects.collect { project ->
+        project.sourceSets.main.allJava
+    }
+    classpath = files(subprojects.collect { project ->
+        project.sourceSets.main.compileClasspath
+    })
+
+    exclude '**/internal/**'
+}
+
+subprojects {
+
 }

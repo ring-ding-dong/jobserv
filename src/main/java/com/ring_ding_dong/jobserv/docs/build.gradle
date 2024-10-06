@@ -1,0 +1,7 @@
+dependencies {
+    implementation project(':api')
+    implementation project(':core')
+    implementation project(':logging')
+    implementation project(':monitoring')
+    implementation project(':performance')
+}
