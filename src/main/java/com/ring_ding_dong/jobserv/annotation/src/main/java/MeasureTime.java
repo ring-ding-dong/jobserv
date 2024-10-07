@@ -63,4 +63,50 @@ public @interface MeasureTime {
      * @return the threshold value
      */
     double threshold() default 0.0;
+
+    /**
+     * Specifies a custom logger name to be used for logging the execution time. This can be used to
+     * route logs to specific loggers in the logging framework.
+     *
+     * @return the name of the logger to use
+     */
+    String loggerName() default "";
+
+    /**
+     * Determines whether to include method parameters in the log output. Note: Enable this with
+     * caution as it may log sensitive information.
+     *
+     * @return true if method parameters should be included in logs, false otherwise
+     */
+    boolean includeParameters() default false;
+
+    /**
+     * Specifies tags to be included with the log entry. These can be used for filtering or
+     * categorizing log entries.
+     *
+     * @return an array of tags
+     */
+    String[] tags() default {};
+
+    /**
+     * Determines whether to track and log memory usage before and after method execution.
+     *
+     * @return true if memory usage should be tracked, false otherwise
+     */
+    boolean trackMemoryUsage() default false;
+
+    /**
+     * Specifies the maximum number of times this method's execution should be logged. After this
+     * limit is reached, further executions will not be logged. A value of 0 means no limit.
+     *
+     * @return the maximum number of times to log this method's execution
+     */
+    int maxLogCount() default 0;
+
+    /**
+     * Determines whether to log stack trace for executions exceeding the threshold.
+     *
+     * @return true if stack trace should be logged for slow executions, false otherwise
+     */
+    boolean logStackTraceOnThresholdExceeded() default false;
 }
