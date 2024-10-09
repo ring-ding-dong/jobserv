@@ -1,60 +1,64 @@
-// 프로젝트에 적용할 플러그인 선언
 plugins {
-    id 'java-library'        // Java 라이브러리 프로젝트를 위한 플러그인
-    id 'maven-publish'       // Maven 저장소에 프로젝트를 발행하기 위한 플러그인
+    id 'java-library'
+    id 'maven-publish'
+    id 'jacoco'
 }
 
-// 모든 프로젝트(루트 및 서브프로젝트)에 적용될 공통 설정
 allprojects {
-    group = 'com.ring-ding-dong'  // 프로젝트의 그룹 ID 설정
-    version = '0.1.0'             // 프로젝트의 버전 설정
+    group = 'com.ring-ding-dong'
+    version = '0.1.0'
 
     repositories {
-        mavenCentral()            // 의존성을 다운로드할 저장소 지정 (Maven Central)
+        mavenCentral()
     }
 }
 
-// 서브프로젝트에만 적용될 설정
+def excludedProjects = [':sample', ':docs']
+
 subprojects {
-    apply plugin: 'java-library'   // 각 서브프로젝트에 Java 라이브러리 플러그인 적용
-    apply plugin: 'maven-publish'  // 각 서브프로젝트에 Maven 발행 플러그인 적용
+    apply plugin: 'java-library'
+    apply plugin: 'maven-publish'
+    apply plugin: 'jacoco'
 
-    // Java 소스 및 타겟 호환성 버전 설정 (Java 8)
-    sourceCompatibility = JavaVersion.VERSION_1_8
-    targetCompatibility = JavaVersion.VERSION_1_8
+    java {
+        toolchain {
+            languageVersion = JavaLanguageVersion.of(8)
+        }
+    }
 
-    // 프로젝트 의존성 설정
     dependencies {
-        // 테스트를 위한 Mockito 라이브러리 추가
         testImplementation 'org.mockito:mockito-core:5.14.1'
-        // JUnit 5 API 추가 (테스트 작성용)
         testImplementation 'org.junit.jupiter:junit-jupiter-api:5.10.3'
-        // JUnit 5 엔진 추가 (테스트 실행용)
         testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.10.2'
     }
 
-    // 테스트 실행 설정
-    test {
-        useJUnitPlatform()  // JUnit 5 플랫폼을 사용하여 테스트 실행
+    tasks.named('test') {
+        useJUnitPlatform()
+        finalizedBy tasks.jacocoTestReport
     }
 
-    // Java 프로젝트 설정
+
+    tasks.named('jacocoTestReport') {
+        reports {
+            xml.required = true
+            html.required = true
+        }
+    }
+
     java {
-        withJavadocJar()  // Javadoc JAR 파일 생성
-        withSourcesJar()  // 소스 코드 JAR 파일 생성
+        withJavadocJar()
+        withSourcesJar()
     }
 
     tasks.withType(Javadoc).configureEach {
         options.encoding = 'UTF-8'
     }
 
-    // Maven 저장소 발행 설정
     publishing {
         publications {
             mavenJava(MavenPublication) {
-                from components.java  // Java 컴포넌트를 발행
+                from components.java
 
-                // POM 파일 정보 설정
                 pom {
                     name = 'Jobserv'
                     description = 'Java Observability Toolkit'
@@ -81,13 +85,20 @@ subprojects {
             }
         }
     }
-}
 
-// Javadoc 설정 추가
+    if (excludedProjects.contains(project.path)) {
+        tasks.withType(Test).configureEach {
+            enabled = false
+        }
+        tasks.withType(JacocoReport).configureEach {
+            enabled = false
+        }
+    }
+}
 
 tasks.register('aggregateJavadoc', Javadoc) {
     title = "jobserv API Documentation"
-    destinationDir = file("$buildDir/docs/javadoc")
+    destinationDirectory.set(layout.buildDirectory.dir("docs/javadoc"))
 
     options.memberLevel = JavadocMemberLevel.PROTECTED
     options.author = true
@@ -96,16 +107,39 @@ tasks.register('aggregateJavadoc', Javadoc) {
     options.use = true
     options.splitIndex = true
 
-    source = subprojects.collect { project ->
+    source(subprojects.collect { project ->
         project.sourceSets.main.allJava
-    }
+    })
     classpath = files(subprojects.collect { project ->
         project.sourceSets.main.compileClasspath
     })
 
+    options.encoding = 'UTF-8'
+    options.charSet = 'UTF-8'
+    options.addStringOption('Xdoclint:none', '-quiet')
     exclude '**/internal/**'
 }
 
-subprojects {
+tasks.register('jacocoRootReport', JacocoReport) {
+    description = 'Generates an aggregate report from all subprojects'
 
+    dependsOn(subprojects.test)
+
+    sourceDirectories.from(subprojects.sourceSets.main.allSource.srcDirs)
+    classDirectories.from(subprojects.sourceSets.main.output)
+    executionData.from(subprojects.jacocoTestReport.executionData)
+
+    reports {
+        html.required = true
+        xml.required = true
+    }
+
+    afterEvaluate {
+        classDirectories.setFrom(files(classDirectories.files.collect { fileTree(dir: it, exclude: excludedProjects.collect { proj -> "**/${proj.replace(':', '')}/**" }) }))
+    }
+}
+
+javadoc {
+    source = sourceSets.main.allJava
+    options.memberLevel = JavadocMemberLevel.PROTECTED
 }

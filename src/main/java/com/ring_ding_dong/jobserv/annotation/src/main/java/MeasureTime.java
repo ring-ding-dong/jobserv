@@ -2,6 +2,7 @@ import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Annotation used to measure and log the execution time of a method. When applied to a method, it
@@ -35,34 +36,20 @@ public @interface MeasureTime {
     String value() default "";
 
     /**
-     * Determines whether the execution time should be logged to the console.
+     * Specifies the time unit to be used for reporting the execution time.
      *
-     * @return true if logging to console is enabled, false otherwise
+     * @return the TimeUnit for measuring execution time
      */
-    boolean logToConsole() default true;
+    TimeUnit timeUnit() default TimeUnit.MILLISECONDS;
 
     /**
-     * Determines whether the execution time should be logged to a file.
+     * Specifies the minimum execution time required for the measurement to be logged. Executions
+     * faster than this threshold will not be logged.
      *
-     * @return true if logging to file is enabled, false otherwise
-     */
-    boolean logToFile() default false;
-
-    /**
-     * Specifies the time unit to be used for reporting the execution time. Possible values are
-     * "NANOSECONDS", "MICROSECONDS", "MILLISECONDS", "SECONDS".
-     *
-     * @return the time unit as a string
-     */
-    String timeUnit() default "MILLISECONDS";
-
-    /**
-     * Specifies the minimum execution time (in the specified time unit) required for the
-     * measurement to be logged. Executions faster than this threshold will not be logged.
-     *
-     * @return the threshold value
+     * @return the threshold value in the specified time unit
      */
     double threshold() default 0.0;
+
 
     /**
      * Specifies a custom logger name to be used for logging the execution time. This can be used to

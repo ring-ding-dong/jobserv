@@ -1,7 +1,7 @@
 dependencies {
-    implementation project(':api')
-    implementation project(':core')
+    // 아무 의존성도 없어야 함
 }
+
 
 jar {
     manifest {
