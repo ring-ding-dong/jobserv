@@ -1,5 +1,6 @@
 rootProject.name = 'jobserv'
-['annotation', 'api', 'core', 'logging', 'monitoring', 'performance', 'sample','common','docs'].each { module ->
+
+['annotation', 'api', 'common', 'core', 'docs', 'logging', 'monitoring', 'performance', 'sample'].each { module ->
     include ":$module"
-    project(":$module").projectDir = file("src/main/java/com/ring_ding_dong/jobserv/$module")
+    project(":$module").projectDir = file(module)
 }

@@ -95,7 +95,7 @@ subprojects {
     }
 
     // 테스트 태스크 설정
-    tasks.withType(Test) {
+    tasks.withType(Test).configureEach {
         useJUnitPlatform()
         javaLauncher = javaToolchains.launcherFor {
             languageVersion = JavaLanguageVersion.of(21)
