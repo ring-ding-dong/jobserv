@@ -29,21 +29,16 @@ To get started with Jobserv, simply download the JAR file from the [releases pag
 ```
 jobserv/
 ├── gradle/
-├── src/
-│   └── main/
-│       └── java/
-│           └── com/
-│               └── ring_ding_dong/
-│                   └── jobserv/
-│                       ├── annotation/
-│                       ├── api/
-│                       ├── common/
-│                       ├── core/
-│                       ├── docs/
-│                       ├── logging/
-│                       ├── monitoring/
-│                       ├── performance/
-│                       └── sample/
+├── .github/
+├── annotation/
+├── api/
+├── common/
+├── core/
+├── docs/
+├── logging/
+├── monitoring/
+├── performance/
+└── sample/
 ├── build.gradle
 ├── settings.gradle
 ├── gradlew
