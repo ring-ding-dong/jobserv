@@ -1,3 +1,6 @@
+![Coverage](https://img.shields.io/badge/coverage-0%25-red)
+
+
 # Jobserv: Java Observability Toolkit
 
 Jobserv is a lightweight, pure Java-based toolkit designed to enhance application observability. It provides a comprehensive suite of tools for logging, performance monitoring, and system diagnostics.
