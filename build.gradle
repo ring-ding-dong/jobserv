@@ -1,20 +1,33 @@
+// 기본 플러그인 적용
 plugins {
-    id 'java-library'
-    id 'maven-publish'
-    id 'jacoco'
+    id 'java-library'      // Java 라이브러리 프로젝트를 위한 플러그인
+    id 'maven-publish'     // Maven 저장소에 프로젝트를 게시하기 위한 플러그인
+    id 'jacoco'            // 코드 커버리지 분석을 위한 JaCoCo 플러그인
 }
 
+// 모든 프로젝트(루트 및 서브프로젝트)에 적용되는 설정
 allprojects {
-    group = 'com.ring-ding-dong'
-    version = '0.1.0'
+    group = 'com.ring-ding-dong'  // 프로젝트 그룹 ID
+    version = '0.1.0-SNAPSHOT'    // 프로젝트 버전 (SNAPSHOT은 개발 중 버전을 의미)
 
     repositories {
-        mavenCentral()
+        mavenCentral()  // Maven Central 저장소 사용
+        maven {
+            name = "GitHubPackages"
+            url = uri("https://maven.pkg.github.com/ring-ding-dong/jobserv")
+            credentials {
+                // GitHub Packages 접근을 위한 인증 정보
+                username = providers.gradleProperty("gpr.user").orElse(providers.environmentVariable("GITHUB_USERNAME"))
+                password = providers.gradleProperty("gpr.key").orElse(providers.environmentVariable("GITHUB_TOKEN"))
+            }
+        }
     }
 }
 
+// 테스트 및 JaCoCo 리포트에서 제외할 프로젝트 목록
 def excludedProjects = [':sample', ':docs']
 
+// 모든 서브프로젝트에 적용되는 설정
 subprojects {
     apply plugin: 'java-library'
     apply plugin: 'maven-publish'
@@ -22,43 +35,63 @@ subprojects {
 
     java {
         toolchain {
-            languageVersion = JavaLanguageVersion.of(8)
+            languageVersion = JavaLanguageVersion.of(8)  // Java 8 사용
         }
     }
 
+    // 테스트 의존성 추가
     dependencies {
         testImplementation 'org.mockito:mockito-core:5.14.1'
         testImplementation 'org.junit.jupiter:junit-jupiter-api:5.10.3'
         testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.10.2'
     }
 
+    // 테스트 태스크 설정
     tasks.named('test') {
-        useJUnitPlatform()
-        finalizedBy tasks.jacocoTestReport
+        useJUnitPlatform()  // JUnit 5 사용
+        finalizedBy(tasks.named('jacocoTestReport'))  // 테스트 후 JaCoCo 리포트 생성
     }
 
-
+    // JaCoCo 리포트 설정
     tasks.named('jacocoTestReport') {
         reports {
-            xml.required = true
-            html.required = true
+            xml.required = true // XML 리포트 생성
+            html.required = true // HTML 리포트 생성
         }
     }
 
+    // Javadoc 및 소스 JAR 생성
     java {
+        // Javadoc JAR 생성(기본 JAR과 별도로 생성)
         withJavadocJar()
+        // 소스 JAR 생성(기본 JAR과 별도로 생성)
         withSourcesJar()
     }
 
+    // Javadoc 태스크 설정
     tasks.withType(Javadoc).configureEach {
-        options.encoding = 'UTF-8'
+        // Javadoc 옵션 설정
+        options.encoding = 'UTF-8' // 인코딩 설정
+        options.addStringOption('Xdoclint:none', '-quiet')  // Javadoc 경고 무시
     }
 
+    // Maven 게시 설정
     publishing {
+        repositories {
+            maven {
+                name = "GitHubPackages"
+                url = uri("https://maven.pkg.github.com/ring-ding-dong/jobserv")
+                credentials {
+                    username = providers.gradleProperty("gpr.user").orElse(providers.environmentVariable("GITHUB_USERNAME"))
+                    password = providers.gradleProperty("gpr.key").orElse(providers.environmentVariable("GITHUB_TOKEN"))
+                }
+            }
+        }
         publications {
-            mavenJava(MavenPublication) {
-                from components.java
+            gpr(MavenPublication) { // GitHub Packages에 게시
+                from(components.java) // Java 라이브러리 컴포넌트 사용
 
+                // POM 정보 설정
                 pom {
                     name = 'Jobserv'
                     description = 'Java Observability Toolkit'
@@ -78,14 +111,17 @@ subprojects {
                     }
                     scm {
                         connection = 'scm:git:git://github.com/ring-ding-dong/jobserv.git'
-                        developerConnection = 'scm:git::ssh://github.com/ring-ding-dong/jobserv.git'
-                        url = 'https://github.com/ring-ding-dong/jobserv'
+                        // Git 연결 정보
+                        developerConnection = 'scm:git:ssh://github.com/ring-ding-dong/jobserv.git'
+                        // 개발자용 Git 연결 정보
+                        url = 'https://github.com/ring-ding-dong/jobserv' // 프로젝트 URL
                     }
                 }
             }
         }
     }
 
+    // 제외된 프로젝트에 대한 테스트 및 JaCoCo 리포트 비활성화
     if (excludedProjects.contains(project.path)) {
         tasks.withType(Test).configureEach {
             enabled = false
@@ -96,50 +132,78 @@ subprojects {
     }
 }
 
+// 전체 프로젝트의 Javadoc을 생성하는 태스크
 tasks.register('aggregateJavadoc', Javadoc) {
-    title = "jobserv API Documentation"
-    destinationDirectory.set(layout.buildDirectory.dir("docs/javadoc"))
+    group = 'Documentation' // 문서화 작업 그룹
+    description = 'Generates aggregate Javadoc for all subprojects' // 작업 설명
+    title = "Jobserv API Documentation" // 문서 제목
+    destinationDirectory.set(layout.buildDirectory.dir("docs/javadoc")) // Javadoc 출력 디렉토리
 
-    options.memberLevel = JavadocMemberLevel.PROTECTED
-    options.author = true
-    options.version = true
-    options.header = "jobserv Library"
-    options.use = true
-    options.splitIndex = true
+    options {
+        memberLevel = JavadocMemberLevel.PROTECTED // protected 멤버도 문서화
+        author = true // 작성자 정보 표시
+        version = true // 버전 정보 표시
+        header = "Jobserv Library ${project.version}" // 문서 헤더
+        use = true // 사용법 문서화
+        splitIndex = true // 색인 분할
+        encoding = 'UTF-8' // 인코딩 설정
+        charSet = 'UTF-8' // 문자 집합 설정
+        links("https://docs.oracle.com/javase/8/docs/api/") // 외부 링크 추가
+        addStringOption('Xdoclint:none', '-quiet') // Javadoc 경고 무시
+    }
 
-    source(subprojects.collect { project ->
-        project.sourceSets.main.allJava
-    })
-    classpath = files(subprojects.collect { project ->
-        project.sourceSets.main.compileClasspath
-    })
+    source(subprojects.collect { project -> project.sourceSets.main.allJava }) // 소스 디렉토리
+    classpath = files(subprojects.collect { project -> project.sourceSets.main.compileClasspath })
+    // 클래스패스
 
-    options.encoding = 'UTF-8'
-    options.charSet = 'UTF-8'
-    options.addStringOption('Xdoclint:none', '-quiet')
-    exclude '**/internal/**'
+    exclude '**/internal/**'  // internal 패키지 제외
+
+    // Javadoc 생성 전 출력 디렉토리 생성
+    doFirst {
+        subprojects.each { project ->
+            project.sourceSets.main.output.each { dir ->
+                dir.asFile.mkdirs()
+            }
+        }
+    }
 }
 
+// 전체 프로젝트의 JaCoCo 리포트를 생성하는 태스크
 tasks.register('jacocoRootReport', JacocoReport) {
-    description = 'Generates an aggregate report from all subprojects'
+    group = 'Verification' // 검증 작업 그룹
+    description = 'Generates an aggregate JaCoCo report from all subprojects' // 작업 설명
 
-    dependsOn(subprojects.test)
+    dependsOn(subprojects.test) // 모든 테스트 실행 후 리포트 생성
 
-    sourceDirectories.from(subprojects.sourceSets.main.allSource.srcDirs)
-    classDirectories.from(subprojects.sourceSets.main.output)
-    executionData.from(subprojects.jacocoTestReport.executionData)
+    sourceDirectories.from(subprojects.sourceSets.main.allSource.srcDirs) // 소스 디렉토리
+    classDirectories.from(subprojects.sourceSets.main.output) // 클래스 디렉토리
+    executionData.from(subprojects.jacocoTestReport.map { it.executionData }) // 실행 데이터
 
     reports {
-        html.required = true
-        xml.required = true
+        html.required = true // HTML 리포트 생성
+        xml.required = true // XML 리포트 생성
+        csv.required = false // CSV 리포트 생성
     }
 
+    // 특정 클래스 제외
     afterEvaluate {
-        classDirectories.setFrom(files(classDirectories.files.collect { fileTree(dir: it, exclude: excludedProjects.collect { proj -> "**/${proj.replace(':', '')}/**" }) }))
+        classDirectories.setFrom(files(classDirectories.files.collect {
+            fileTree(dir: it, exclude:
+                    excludedProjects.collect { proj -> "**/${proj.replace(':', '')}/**" } +
+                            ['**/R.class', '**/R$*.class', '**/BuildConfig.*', '**/Manifest*.*', '**/*Test*.*', 'android/**/*.*']
+            )
+        }))
+    }
+
+    // 존재하지 않는 실행 데이터 파일 제외
+    doFirst {
+        executionData.setFrom(files(executionData.files.findAll { it.exists() }))
     }
 }
 
-javadoc {
-    source = sourceSets.main.allJava
-    options.memberLevel = JavadocMemberLevel.PROTECTED
+// Javadoc 및 JaCoCo 리포트를 한 번에 생성하는 편의 태스크
+tasks.register('generateAllDocs') {
+    group = 'Documentation' // 문서화 작업 그룹
+    description = 'Generates all documentation including Javadoc and test reports' // 작업 설명
+    dependsOn(tasks.named('aggregateJavadoc'), tasks.named('jacocoRootReport'))
 }
