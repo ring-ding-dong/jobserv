@@ -23,6 +23,19 @@ allprojects {
         }
     }
 }
+// Java 버전 호환성 검사 태스크
+tasks.register('checkJavaVersionCompatibility', JavaExec) {
+    dependsOn ':common:classes'
+    classpath = project(':common').sourceSets.main.runtimeClasspath
+    mainClass = 'com.ring_ding_dong.jobserv.common.utils.JavaVersionCheck'
+
+    (8..21).each { version ->
+        javaLauncher = javaToolchains.launcherFor {
+            languageVersion = JavaLanguageVersion.of(version)
+        }
+        args version.toString()
+    }
+}
 
 // 테스트 및 JaCoCo 리포트에서 제외할 프로젝트 목록
 def excludedProjects = [':sample', ':docs']
@@ -37,28 +50,46 @@ subprojects {
         toolchain {
             languageVersion = JavaLanguageVersion.of(8)  // Java 8 사용
         }
+        sourceCompatibility = JavaVersion.VERSION_1_8
+        targetCompatibility = JavaVersion.VERSION_1_8
     }
+
+    tasks.withType(JavaCompile).configureEach {
+        options.release = 8
+    }
+
+    sourceSets {
+        main.java.srcDirs = ['src/main/java']
+        test.java.srcDirs = ['src/test/java']
+    }
+
 
     // 테스트 의존성 추가
     dependencies {
         testImplementation 'org.mockito:mockito-core:5.14.1'
-        testImplementation 'org.junit.jupiter:junit-jupiter-api:5.10.3'
+        testImplementation 'org.junit.jupiter:junit-jupiter-api:5.10.2'
         testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.10.2'
     }
 
     // 테스트 태스크 설정
-    tasks.named('test') {
-        useJUnitPlatform()  // JUnit 5 사용
-        finalizedBy(tasks.named('jacocoTestReport'))  // 테스트 후 JaCoCo 리포트 생성
+    tasks.withType(Test) {
+        dependsOn rootProject.tasks.checkJavaVersionCompatibility
+        useJUnitPlatform()
+        javaLauncher = javaToolchains.launcherFor {
+            languageVersion = JavaLanguageVersion.of(21)
+        }
+        finalizedBy jacocoTestReport
     }
 
+
     // JaCoCo 리포트 설정
-    tasks.named('jacocoTestReport') {
+    jacocoTestReport {
         reports {
-            xml.required = true // XML 리포트 생성
-            html.required = true // HTML 리포트 생성
+            xml.required = true
+            html.required = true
         }
     }
+
 
     // Javadoc 및 소스 JAR 생성
     java {
@@ -123,12 +154,8 @@ subprojects {
 
     // 제외된 프로젝트에 대한 테스트 및 JaCoCo 리포트 비활성화
     if (excludedProjects.contains(project.path)) {
-        tasks.withType(Test).configureEach {
-            enabled = false
-        }
-        tasks.withType(JacocoReport).configureEach {
-            enabled = false
-        }
+        tasks.withType(Test).configureEach { enabled = false }
+        tasks.withType(JacocoReport).configureEach { enabled = false }
     }
 }
 
