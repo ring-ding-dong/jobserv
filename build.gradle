@@ -24,17 +24,39 @@ allprojects {
     }
 }
 // Java 버전 호환성 검사 태스크
-tasks.register('checkJavaVersionCompatibility', JavaExec) {
-    dependsOn ':common:classes'
-    classpath = project(':common').sourceSets.main.runtimeClasspath
-    mainClass = 'com.ring_ding_dong.jobserv.common.utils.JavaVersionCheck'
+def javaVersions = (8..21)
 
-    (8..21).each { version ->
+javaVersions.each { version ->
+    tasks.register("checkJavaVersion${version}", JavaExec) {
+        dependsOn ':common:classes'
+        group = 'Verification'
+        description = "Checks Java version compatibility for Java ${version}"
+        classpath = project(':common').sourceSets.main.runtimeClasspath
+        mainClass = 'com.ring_ding_dong.jobserv.common.utils.JavaVersionCheck'
+        jvmArgs = ["-Djava.version=${version}.0"]
+
         javaLauncher = javaToolchains.launcherFor {
             languageVersion = JavaLanguageVersion.of(version)
         }
-        args version.toString()
+
+        standardOutput = new ByteArrayOutputStream()
+        errorOutput = new ByteArrayOutputStream()
+
+        doLast {
+            String output = standardOutput.toString().trim()
+            String error = errorOutput.toString().trim()
+            println "Java ${version} compatibility check result: ${output ?: error}"
+            if (error) {
+                throw new GradleException("Java ${version} compatibility check failed: ${error}")
+            }
+        }
     }
+}
+
+tasks.register('checkAllJavaVersions') {
+    group = 'Verification'
+    description = 'Checks Java version compatibility for all supported versions'
+    dependsOn tasks.matching { it.name.startsWith("checkJavaVersion") }
 }
 
 // 테스트 및 JaCoCo 리포트에서 제외할 프로젝트 목록
@@ -55,7 +77,7 @@ subprojects {
     }
 
     tasks.withType(JavaCompile).configureEach {
-        options.release = 8
+        options.encoding = 'UTF-8'
     }
 
     sourceSets {
@@ -69,11 +91,11 @@ subprojects {
         testImplementation 'org.mockito:mockito-core:5.14.1'
         testImplementation 'org.junit.jupiter:junit-jupiter-api:5.10.2'
         testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.10.2'
+        testImplementation 'org.junit.jupiter:junit-jupiter-params:5.10.2'
     }
 
     // 테스트 태스크 설정
     tasks.withType(Test) {
-        dependsOn rootProject.tasks.checkJavaVersionCompatibility
         useJUnitPlatform()
         javaLauncher = javaToolchains.launcherFor {
             languageVersion = JavaLanguageVersion.of(21)

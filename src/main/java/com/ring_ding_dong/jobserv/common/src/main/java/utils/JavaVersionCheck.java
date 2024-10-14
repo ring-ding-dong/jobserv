@@ -1,18 +1,15 @@
 package utils;
 
 public class JavaVersionCheck {
-    public static void main(String[] args) {
+    public static String checkJavaVersion() {
         String version = System.getProperty("java.version");
-        System.out.println("Running on Java version: " + version);
-
         if (version.startsWith("1.8")) {
-            System.out.println("Running on Java 8");
+            return "Running on Java 8";
         } else {
             try {
-                // Java 9+ 방식으로 버전 확인
                 int majorVersion = getMajorVersion(version);
                 if (majorVersion >= 9 && majorVersion <= 21) {
-                    System.out.println("Running on Java " + majorVersion);
+                    return "Running on Java " + majorVersion;
                 } else {
                     throw new RuntimeException("Unsupported Java version: " + version);
                 }
@@ -22,9 +19,12 @@ public class JavaVersionCheck {
         }
     }
 
-    private static int getMajorVersion(String version) {
-        // Java 9 이상의 버전 문자열 파싱
+    static int getMajorVersion(String version) {
         int firstDot = version.indexOf('.');
         return Integer.parseInt(firstDot == -1 ? version : version.substring(0, firstDot));
+    }
+
+    public static void main(String[] args) {
+        System.out.println(checkJavaVersion());
     }
 }
