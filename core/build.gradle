@@ -1,6 +1,7 @@
 dependencies {
     implementation project(':annotation')
     implementation project(':common')
+    implementation project(':core')
 }
 
 
