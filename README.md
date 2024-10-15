@@ -49,6 +49,22 @@ jobserv/
 
 ## 서브모듈 설명
 
+** 각 서브 모듈 내에서 패키지 구조는 아래와 같이 설계됩니다. **
+
+```
+jobserv.[module]/
+├── src/
+│   ├── main/
+│   │   ├── java/
+│           ├── com.ring-ding-dong.jobserv.[module]/ 
+│   │   └── resources/
+│   └── test/
+│       ├── java/
+│           ├── com.ring-ding-dong.jobserv.[module]/ 
+│       └── resources/
+├── build.gradle
+```
+
 ### 1. annotation [jobserv.annotation]
 
 **역할:** 프로젝트에서 사용되는 커스텀 애노테이션을 정의합니다.
