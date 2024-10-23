@@ -1,6 +1,8 @@
 rootProject.name = 'jobserv'
 
-['annotation', 'api', 'common', 'core', 'docs', 'logging', 'monitoring', 'performance', 'sample'].each { module ->
-    include ":$module"
-    project(":$module").projectDir = file(module)
-}
+include 'api'
+include 'core'
+include 'impl:logging'
+include 'impl:metrics'
+include 'impl:tracing'
+include 'examples'
